@@ -15,7 +15,7 @@ extern uint8_t hello[128*8];
 extern uint8_t logo_main[128*8];
 
 
-extern uint16_t charset[8*26];
+extern uint16_t charset[26][8];
 
 
 
