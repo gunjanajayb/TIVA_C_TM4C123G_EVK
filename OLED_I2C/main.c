@@ -1,13 +1,6 @@
-#include <stdint.h>
-#include <stdbool.h>
-#include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
-#include "driverlib/debug.h"
-#include "driverlib/gpio.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/pin_map.h"
-#include "driverlib/i2c.h"
-#include "symbols.h"
+
+#include "I2Cfunc.h"
+#include "utils.h"
 
 //*****************************************************************************
 //
@@ -21,92 +14,6 @@ __error__(char *pcFilename, uint32_t ui32Line)
     while(1);
 }
 #endif
-
-#define SLAVE_ADDRESS 0x3C
-
-int sendDataSingle_I2C(uint8_t ui8Data)
-{
-    I2CMasterSlaveAddrSet(I2C0_BASE, SLAVE_ADDRESS, false); //false means write operation and ture means read operation
-    I2CMasterDataPut(I2C0_BASE, 0x00);   //data to be sent
-
-    while(I2CMasterBusBusy(I2C0_BASE))
-    {
-    }
-
-    I2CMasterControl(I2C0_BASE, I2C_MASTER_CMD_BURST_SEND_START);
-    while(I2CMasterBusy(I2C0_BASE))
-    {
-    }
-    while(I2CMasterErr(I2C0_BASE))
-    {
-    }
-
-    I2CMasterDataPut(I2C0_BASE, ui8Data);   //data to be sent
-    I2CMasterControl(I2C0_BASE, I2C_MASTER_CMD_BURST_SEND_FINISH);
-    while(I2CMasterBusy(I2C0_BASE))
-    {
-    }
-    while(I2CMasterErr(I2C0_BASE))
-    {
-    }
-
-    return 0;
-}
-
-int sendDataMulti_I2C(uint8_t *ui8Data, uint32_t len, bool isCmd)
-{
-    uint8_t CoByte;
-    I2CMasterSlaveAddrSet(I2C0_BASE, SLAVE_ADDRESS, false); //false means write operation and ture means read operation
-
-    if(isCmd == true)
-        CoByte = 0x00;
-    else
-        CoByte = 0x40;
-
-
-    I2CMasterDataPut(I2C0_BASE, CoByte);   //data to be sent
-
-    while(I2CMasterBusBusy(I2C0_BASE))
-    {
-    }
-
-    I2CMasterControl(I2C0_BASE, I2C_MASTER_CMD_BURST_SEND_START);
-    while(I2CMasterBusy(I2C0_BASE))
-    {
-    }
-    while(I2CMasterErr(I2C0_BASE))
-    {
-    }
-
-    while(len > 1)
-    {
-        I2CMasterDataPut(I2C0_BASE, *ui8Data);   //data to be sent
-        I2CMasterControl(I2C0_BASE, I2C_MASTER_CMD_BURST_SEND_CONT);
-        while(I2CMasterBusy(I2C0_BASE))
-        {
-        }
-        while(I2CMasterErr(I2C0_BASE))
-        {
-        }
-        ui8Data++;
-        len--;
-    }
-
-    I2CMasterDataPut(I2C0_BASE, *ui8Data);   //data to be sent
-    I2CMasterControl(I2C0_BASE, I2C_MASTER_CMD_BURST_SEND_FINISH);
-    while(I2CMasterBusy(I2C0_BASE))
-    {
-    }
-    while(I2CMasterErr(I2C0_BASE))
-    {
-    }
-
-    return ui8Data;
-
-}
-
-
-
 
 int
 main(void)
@@ -165,7 +72,9 @@ main(void)
     sendDataMulti_I2C(cmd1,sizeof(cmd1),true);
 
 
-    sendDataMulti_I2C(logo_main,sizeof(logo_main),false);
+    char str[40] = {"SKYNET"};
+    display(str,strlen(str));
+
 
     while(1)
     {
