@@ -38,15 +38,14 @@ void updatePosition(){
     image_oled.bufferPtr += image_oled.cWidth + image_oled.charspacing;
 
     //if the current line gets full then move to next line
-    if(image_oled.curr_Position.x > (128 - image_oled.cWidth + image_oled.charspacing))
+    if(image_oled.curr_Position.x > (128 - image_oled.cWidth - image_oled.charspacing))
     {
         image_oled.curr_Position.y += image_oled.cHeight + image_oled.linespacing;
-        image_oled.curr_Position.x = image_oled.leftmargin;
+        image_oled.curr_Position.x = 0 + image_oled.leftmargin;
 
-        image_oled.currentPage = image_oled.curr_Position.y / PAGE_HEIGHT;
-        image_oled.currentPageAdd += image_oled.currentPage* TOTAL_WIDTH;
-        image_oled.bufferPtr = image_oled.currentPageAdd;
-        image_oled.leftmargin += image_oled.leftmargin;
+        image_oled.currentPage = (image_oled.curr_Position.y / PAGE_HEIGHT);
+        image_oled.bufferPtr = image_oled.currentPageAdd + (image_oled.currentPage* TOTAL_WIDTH);
+        image_oled.bufferPtr += image_oled.leftmargin;
     }
 
 }
@@ -62,12 +61,12 @@ void addImageToBuffer(uint16_t *ptr){
     uint8_t next_page_num;
     uint8_t numPage;
 
-    if((image_oled.curr_Position.y + image_oled.cHeight) % 8 != 0){
-        next_page_num = (( image_oled.curr_Position.y + image_oled.cHeight) / PAGE_HEIGHT );
+    if((image_oled.curr_Position.y + image_oled.cHeight + image_oled.linespacing) % 8 != 0){
+        next_page_num = (( image_oled.curr_Position.y + image_oled.cHeight + image_oled.linespacing) / PAGE_HEIGHT );
     }
     else
     {
-        next_page_num = (( image_oled.curr_Position.y + image_oled.cHeight) / PAGE_HEIGHT );
+        next_page_num = (( image_oled.curr_Position.y + image_oled.cHeight + image_oled.linespacing) / PAGE_HEIGHT );
     }
 
     numPage = (next_page_num - image_oled.currentPage) + 1;
@@ -78,7 +77,7 @@ void addImageToBuffer(uint16_t *ptr){
     //find the number of shifts required
     uint8_t numShifts;
 
-    numShifts = (image_oled.curr_Position.y % PAGE_HEIGHT);
+    numShifts = ((image_oled.curr_Position.y) % PAGE_HEIGHT);
     //***********************************************************************//
 
     tempbuf = image_oled.bufferPtr;
@@ -87,7 +86,7 @@ void addImageToBuffer(uint16_t *ptr){
     {
         for(j = 0; j < numPage; j++)
         {
-            *(tempbuf + (TOTAL_WIDTH * j)) = (((*ptr) << numShifts) & (0x000000FF << (j * 8))) >> (j * 8);
+            *(tempbuf + (TOTAL_WIDTH * j)) |= (((*ptr) << numShifts) & (0x000000FF << (j * 8))) >> (j * 8);
         }
         ptr++;
         tempbuf++;
