@@ -15,15 +15,16 @@ void display(char *str, uint32_t len)
     uint8_t i;
     char c;
 
-    initialize_Imagebuf();
+    initialize_Image();
+    setStartPosition();
 
     for(i = 0; i < len; i++)
     {
         c = str[i];
-        addImageToBuffer(&charset[c - 0x41][0]);
+        addImageToBuffer(&charset[c - 0x20][0]);
     }
 
-    sendDataMulti_I2C(buffer,sizeof(buffer),false);
+    sendDataMulti_I2C(image_oled.buffer,sizeof(image_oled.buffer),false);
 
 
 

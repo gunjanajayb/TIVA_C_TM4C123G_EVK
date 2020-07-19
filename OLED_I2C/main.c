@@ -72,7 +72,7 @@ main(void)
     sendDataMulti_I2C(cmd1,sizeof(cmd1),true);
 
 
-    char str[40] = {"EASEMSYS"};
+    char str[100] = {"1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
     display(str,strlen(str));
 
 
